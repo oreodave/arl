@@ -33,37 +33,13 @@ const char *parse_err_to_string(parse_err_t err)
   }
 }
 
+/// Prototypes for parsing
 bool stream_eos(parse_stream_t *stream);
 char stream_peek(parse_stream_t *stream);
 void stream_advance(parse_stream_t *stream, u64 size);
 u64 stream_size(parse_stream_t *stream);
-
-parse_err_t parse_string(parse_stream_t *stream, obj_t *ret)
-{
-  // Increment the cursor just past the first speechmark
-  stream_advance(stream, 1);
-  sv_t current_contents = sv_chop_left(stream->contents, stream->cursor);
-  u64 string_size       = sv_till(current_contents, "\"");
-  if (string_size + stream->cursor == stream_size(stream))
-    return PARSE_ERR_EXPECTED_SPEECH_MARKS;
-  // Bounds of string are well defined, generate an object and advance the
-  // stream
-  *ret = obj_string(stream->line, stream->column - 1,
-                    SV(current_contents.data, string_size));
-  stream_advance(stream, string_size + 1);
-  return PARSE_ERR_OK;
-}
-
-parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret)
-{
-  sv_t current_contents = sv_chop_left(stream->contents, stream->cursor);
-  u64 symbol_size       = sv_while(current_contents, SYMBOL_CHARS);
-  // Generate symbol
-  *ret = obj_symbol(stream->line, stream->column,
-                    SV(current_contents.data, symbol_size));
-  stream_advance(stream, symbol_size);
-  return PARSE_ERR_OK;
-}
+parse_err_t parse_string(parse_stream_t *stream, obj_t *ret);
+parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret);
 
 parse_err_t parse(ast_t *out, parse_stream_t *stream)
 {
@@ -102,6 +78,33 @@ parse_err_t parse(ast_t *out, parse_stream_t *stream)
       return PARSE_ERR_UNKNOWN_CHAR;
     }
   }
+  return PARSE_ERR_OK;
+}
+
+parse_err_t parse_string(parse_stream_t *stream, obj_t *ret)
+{
+  // Increment the cursor just past the first speechmark
+  stream_advance(stream, 1);
+  sv_t current_contents = sv_chop_left(stream->contents, stream->cursor);
+  u64 string_size       = sv_till(current_contents, "\"");
+  if (string_size + stream->cursor == stream_size(stream))
+    return PARSE_ERR_EXPECTED_SPEECH_MARKS;
+  // Bounds of string are well defined, generate an object and advance the
+  // stream
+  *ret = obj_string(stream->line, stream->column - 1,
+                    SV(current_contents.data, string_size));
+  stream_advance(stream, string_size + 1);
+  return PARSE_ERR_OK;
+}
+
+parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret)
+{
+  sv_t current_contents = sv_chop_left(stream->contents, stream->cursor);
+  u64 symbol_size       = sv_while(current_contents, SYMBOL_CHARS);
+  // Generate symbol
+  *ret = obj_symbol(stream->line, stream->column,
+                    SV(current_contents.data, symbol_size));
+  stream_advance(stream, symbol_size);
   return PARSE_ERR_OK;
 }
 
