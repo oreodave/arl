@@ -8,23 +8,21 @@
 #include <arl/lib/vec.h>
 #include <arl/parser/ast.h>
 
-obj_t obj_string(u64 line, u64 col, sv_t string)
+obj_t obj_string(u64 byte, sv_t string)
 {
   return (obj_t){
-      .line   = line,
-      .column = col,
-      .type   = TYPE_STRING,
-      .value  = {string},
+      .byte  = byte,
+      .type  = TYPE_STRING,
+      .value = {string},
   };
 }
 
-obj_t obj_symbol(u64 line, u64 col, sv_t symbol)
+obj_t obj_symbol(u64 byte, sv_t symbol)
 {
   return (obj_t){
-      .line   = line,
-      .column = col,
-      .type   = TYPE_SYMBOL,
-      .value  = {symbol},
+      .byte  = byte,
+      .type  = TYPE_SYMBOL,
+      .value = {symbol},
   };
 }
 

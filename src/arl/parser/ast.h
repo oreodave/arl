@@ -20,8 +20,7 @@ typedef enum
 
 typedef struct
 {
-  u64 line, column;
-
+  u64 byte;
   type_t type;
   union
   {
@@ -30,8 +29,8 @@ typedef struct
   } value;
 } obj_t;
 
-obj_t obj_string(u64 line, u64 col, sv_t string);
-obj_t obj_symbol(u64 line, u64 col, sv_t symbol);
+obj_t obj_string(u64 byte, sv_t string);
+obj_t obj_symbol(u64 byte, sv_t symbol);
 void obj_print(FILE *fp, obj_t *obj);
 
 // Our AST is simply a vector of objects.  Nesting and tree like structure is

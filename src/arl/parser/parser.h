@@ -21,10 +21,11 @@ const char *parse_err_to_string(parse_err_t err);
 
 typedef struct
 {
-  u64 line, column, cursor;
+  u64 byte;
   sv_t contents;
 } parse_stream_t;
 
+void parse_stream_get_line_col(parse_stream_t *stream, u64 *line, u64 *col);
 parse_err_t parse(ast_t *out, parse_stream_t *stream);
 
 #endif

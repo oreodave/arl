@@ -33,16 +33,37 @@ const char *parse_err_to_string(parse_err_t err)
   }
 }
 
-/// Prototypes for parsing
+/// Prototypes for streams
 bool stream_eos(parse_stream_t *stream);
 char stream_peek(parse_stream_t *stream);
 void stream_advance(parse_stream_t *stream, u64 size);
 u64 stream_size(parse_stream_t *stream);
+
+void parse_stream_get_line_col(parse_stream_t *stream, u64 *line, u64 *col)
+{
+  assert(stream && line && col && "Expected valid pointers.");
+  for (u64 i = 0; i < stream->byte; ++i)
+  {
+    char c = stream->contents.data[i];
+    if (c == '\n')
+    {
+      *line += 1;
+      *col = 0;
+    }
+    else
+    {
+      *col += 1;
+    }
+  }
+}
+
+/// Prototypes for parsing subroutines
 parse_err_t parse_string(parse_stream_t *stream, obj_t *ret);
 parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret);
 
 parse_err_t parse(ast_t *out, parse_stream_t *stream)
 {
+  assert(out && stream && "Expected valid pointers");
   while (!stream_eos(stream))
   {
     char cur = stream_peek(stream);
@@ -85,32 +106,30 @@ parse_err_t parse_string(parse_stream_t *stream, obj_t *ret)
 {
   // Increment the cursor just past the first speechmark
   stream_advance(stream, 1);
-  sv_t current_contents = sv_chop_left(stream->contents, stream->cursor);
+  sv_t current_contents = sv_chop_left(stream->contents, stream->byte);
   u64 string_size       = sv_till(current_contents, "\"");
-  if (string_size + stream->cursor == stream_size(stream))
+  if (string_size + stream->byte == stream_size(stream))
     return PARSE_ERR_EXPECTED_SPEECH_MARKS;
   // Bounds of string are well defined, generate an object and advance the
   // stream
-  *ret = obj_string(stream->line, stream->column - 1,
-                    SV(current_contents.data, string_size));
+  *ret = obj_string(stream->byte - 1, SV(current_contents.data, string_size));
   stream_advance(stream, string_size + 1);
   return PARSE_ERR_OK;
 }
 
 parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret)
 {
-  sv_t current_contents = sv_chop_left(stream->contents, stream->cursor);
+  sv_t current_contents = sv_chop_left(stream->contents, stream->byte);
   u64 symbol_size       = sv_while(current_contents, SYMBOL_CHARS);
   // Generate symbol
-  *ret = obj_symbol(stream->line, stream->column,
-                    SV(current_contents.data, symbol_size));
+  *ret = obj_symbol(stream->byte, SV(current_contents.data, symbol_size));
   stream_advance(stream, symbol_size);
   return PARSE_ERR_OK;
 }
 
 bool stream_eos(parse_stream_t *stream)
 {
-  return stream->cursor >= stream->contents.size;
+  return stream->byte >= stream->contents.size;
 }
 
 char stream_peek(parse_stream_t *stream)
@@ -118,29 +137,15 @@ char stream_peek(parse_stream_t *stream)
   if (stream_eos(stream))
     return '\0';
   else
-    return stream->contents.data[stream->cursor];
+    return stream->contents.data[stream->byte];
 }
 
 void stream_advance(parse_stream_t *stream, u64 size)
 {
-  if (stream->cursor + size >= stream->contents.size)
-    stream->cursor = stream->contents.size;
+  if (stream->byte + size >= stream->contents.size)
+    stream->byte = stream->contents.size;
   else
-  {
-    for (u64 i = 0; i < size; ++i)
-    {
-      ++stream->cursor;
-      if (stream_peek(stream) == '\n')
-      {
-        stream->line++;
-        stream->column = 0;
-      }
-      else
-      {
-        stream->column++;
-      }
-    }
-  }
+    stream->byte += size;
 }
 
 u64 stream_size(parse_stream_t *stream)
