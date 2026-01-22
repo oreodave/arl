@@ -22,8 +22,6 @@ const char *parse_err_to_string(parse_err_t err)
   {
   case PARSE_ERR_OK:
     return "OK";
-  case PARSE_ERR_UNEXPECTED_EOF:
-    return "UNEXPECTED_EOF";
   case PARSE_ERR_EXPECTED_SPEECH_MARKS:
     return "EXPECTED_SPEECH_MARKS";
   case PARSE_ERR_UNKNOWN_CHAR:

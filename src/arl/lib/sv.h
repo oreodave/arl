@@ -16,12 +16,21 @@ typedef struct
   u64 size;
 } sv_t;
 
+// Constructor and printer macros
 #define SV(PTR, SIZE) ((sv_t){.data = (PTR), .size = (SIZE)})
 #define PR_SV         "%.*s"
 #define SV_FMT(SV)    (int)((SV).size), (SV).data
+
+// Return a new string view which has had LEN characters removed from the
+// beginning
 sv_t sv_chop_left(sv_t sv, u64 len);
+// Return a new string view which has had LEN characters removed from the end
 sv_t sv_chop_right(sv_t sv, u64 len);
+// Return the first index where SV does not present a character from EXPECTED
+// (strspn equivalent)
 u64 sv_while(const sv_t sv, const char *expected);
+// Return the first index where SV presents a character from EXPECTED (strcspn
+// equivalent)
 u64 sv_till(const sv_t sv, const char *expected);
 
 #endif

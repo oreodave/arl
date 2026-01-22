@@ -12,12 +12,14 @@
 #include <arl/lib/sv.h>
 #include <arl/lib/vec.h>
 
+/// Types the AST can encode
 typedef enum
 {
   TYPE_SYMBOL,
   TYPE_STRING,
 } type_t;
 
+/// Node of the AST as a tagged union
 typedef struct
 {
   u64 byte;
@@ -29,12 +31,13 @@ typedef struct
   } value;
 } obj_t;
 
+// Constructors
 obj_t obj_string(u64 byte, sv_t string);
 obj_t obj_symbol(u64 byte, sv_t symbol);
+
 void obj_print(FILE *fp, obj_t *obj);
 
-// Our AST is simply a vector of objects.  Nesting and tree like structure is
-// imposed by individual objects.
+/// The AST as a flat collection of nodes
 typedef struct
 {
   vec_t objects;

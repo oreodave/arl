@@ -10,23 +10,29 @@
 
 #include <arl/parser/ast.h>
 
-typedef enum
-{
-  PARSE_ERR_OK = 0,
-  PARSE_ERR_UNEXPECTED_EOF,
-  PARSE_ERR_EXPECTED_SPEECH_MARKS,
-  PARSE_ERR_UNKNOWN_CHAR,
-} parse_err_t;
-const char *parse_err_to_string(parse_err_t err);
-
+/// Parser streams, utilised when generating an AST.
 typedef struct
 {
   u64 byte;
   sv_t contents;
 } parse_stream_t;
 
-void parse_stream_get_line_col(parse_stream_t *stream, u64 *line, u64 *col);
+/// Types of errors that may occur during parsing
+typedef enum
+{
+  PARSE_ERR_OK = 0,
+  PARSE_ERR_EXPECTED_SPEECH_MARKS,
+  PARSE_ERR_UNKNOWN_CHAR,
+} parse_err_t;
+const char *parse_err_to_string(parse_err_t err);
+
+// Generates an AST from STREAM, storing it in OUT.  Returns any errors it may
+// generate.
 parse_err_t parse(ast_t *out, parse_stream_t *stream);
+
+// Computes the line and column that STREAM is currently pointing at in its
+// buffer, storing it in LINE and COL.
+void parse_stream_get_line_col(parse_stream_t *stream, u64 *line, u64 *col);
 
 #endif
 
