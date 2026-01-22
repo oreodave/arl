@@ -5,6 +5,7 @@
  * Commentary: See ast.h.
  */
 
+#include <arl/lib/vec.h>
 #include <arl/parser/ast.h>
 
 obj_t obj_string(u64 line, u64 col, sv_t string)
@@ -25,6 +26,49 @@ obj_t obj_symbol(u64 line, u64 col, sv_t symbol)
       .type   = TYPE_SYMBOL,
       .value  = {symbol},
   };
+}
+
+void obj_print(FILE *fp, obj_t *obj)
+{
+  if (!obj)
+  {
+    fprintf(fp, "NIL");
+    return;
+  }
+  switch (obj->type)
+  {
+  case TYPE_SYMBOL:
+    fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(obj->value.as_symbol));
+    break;
+  case TYPE_STRING:
+    fprintf(fp, "STRING(" PR_SV ")", SV_FMT(obj->value.as_string));
+    break;
+  }
+}
+
+void ast_print(FILE *fp, ast_t *ast)
+{
+  if (!ast)
+  {
+    fprintf(fp, "{}");
+    return;
+  }
+  fprintf(fp, "{");
+  if (ast->objects.size == 0)
+  {
+    fprintf(fp, "}\n");
+    return;
+  }
+
+  fprintf(fp, "\n");
+  for (u64 i = 0; i < ast->objects.size / sizeof(obj_t); ++i)
+  {
+    obj_t item = VEC_GET(&ast->objects, i, obj_t);
+    fprintf(fp, "\t[%lu]: ", i);
+    obj_print(fp, &item);
+    fprintf(fp, "\n");
+  }
+  fprintf(fp, "}");
 }
 
 void ast_free(ast_t *ast)

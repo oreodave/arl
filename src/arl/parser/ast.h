@@ -32,6 +32,7 @@ typedef struct
 
 obj_t obj_string(u64 line, u64 col, sv_t string);
 obj_t obj_symbol(u64 line, u64 col, sv_t symbol);
+void obj_print(FILE *fp, obj_t *obj);
 
 // Our AST is simply a vector of objects.  Nesting and tree like structure is
 // imposed by individual objects.
@@ -41,6 +42,7 @@ typedef struct
 } ast_t;
 
 void ast_free(ast_t *ast);
+void ast_print(FILE *fp, ast_t *ast);
 
 #endif
 
