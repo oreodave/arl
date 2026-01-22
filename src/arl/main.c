@@ -42,12 +42,15 @@ int main(void)
   sv_t contents        = read_file(filename);
   printf("%s\n=> `" PR_SV "`\n", filename, SV_FMT(contents));
 
-  parse_stream_t stream = {.line = 1, .column = 0, .contents = contents};
+  parse_stream_t stream = {.byte = 0, .contents = contents};
   ast_t ast             = {0};
   parse_err_t perr      = parse(&ast, &stream);
   if (perr)
   {
-    fprintf(stderr, "%s:%lu:%lu: %s\n", filename, stream.line, stream.column,
+    u64 line = 1, col = 0;
+    parse_stream_get_line_col(&stream, &line, &col);
+
+    fprintf(stderr, "%s:%lu:%lu: %s\n", filename, line, col,
             parse_err_to_string(perr));
     goto fail;
   }
