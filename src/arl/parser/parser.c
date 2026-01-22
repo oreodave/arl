@@ -33,45 +33,10 @@ const char *parse_err_to_string(parse_err_t err)
   }
 }
 
-bool stream_eos(parse_stream_t *stream)
-{
-  return stream->cursor >= stream->contents.size;
-}
-
-char stream_peek(parse_stream_t *stream)
-{
-  if (stream_eos(stream))
-    return '\0';
-  else
-    return stream->contents.data[stream->cursor];
-}
-
-void stream_advance(parse_stream_t *stream, u64 size)
-{
-  if (stream->cursor + size >= stream->contents.size)
-    stream->cursor = stream->contents.size;
-  else
-  {
-    for (u64 i = 0; i < size; ++i)
-    {
-      ++stream->cursor;
-      if (stream_peek(stream) == '\n')
-      {
-        stream->line++;
-        stream->column = 0;
-      }
-      else
-      {
-        stream->column++;
-      }
-    }
-  }
-}
-
-u64 stream_size(parse_stream_t *stream)
-{
-  return stream->contents.size;
-}
+bool stream_eos(parse_stream_t *stream);
+char stream_peek(parse_stream_t *stream);
+void stream_advance(parse_stream_t *stream, u64 size);
+u64 stream_size(parse_stream_t *stream);
 
 parse_err_t parse_string(parse_stream_t *stream, obj_t *ret)
 {
@@ -138,6 +103,46 @@ parse_err_t parse(ast_t *out, parse_stream_t *stream)
     }
   }
   return PARSE_ERR_OK;
+}
+
+bool stream_eos(parse_stream_t *stream)
+{
+  return stream->cursor >= stream->contents.size;
+}
+
+char stream_peek(parse_stream_t *stream)
+{
+  if (stream_eos(stream))
+    return '\0';
+  else
+    return stream->contents.data[stream->cursor];
+}
+
+void stream_advance(parse_stream_t *stream, u64 size)
+{
+  if (stream->cursor + size >= stream->contents.size)
+    stream->cursor = stream->contents.size;
+  else
+  {
+    for (u64 i = 0; i < size; ++i)
+    {
+      ++stream->cursor;
+      if (stream_peek(stream) == '\n')
+      {
+        stream->line++;
+        stream->column = 0;
+      }
+      else
+      {
+        stream->column++;
+      }
+    }
+  }
+}
+
+u64 stream_size(parse_stream_t *stream)
+{
+  return stream->contents.size;
 }
 
 /* Copyright (C) 2026 Aryadev Chavali
