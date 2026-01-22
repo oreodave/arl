@@ -1,1 +1,6 @@
 build/
+
+# Development
+compile_commands.json
+.cache/
+TAGS

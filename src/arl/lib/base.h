@@ -1,47 +1,47 @@
-/* main.cpp:
+/* base.h: Basic definitions
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
  * Commentary:
+
+ Taken from prick_aliases.h: see https://github.com/oreodave/prick.
  */
 
+#ifndef BASE_H
+#define BASE_H
+
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef int8_t i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
+
+static_assert(sizeof(float) == 4, "f32 requires 4 byte floats");
+static_assert(sizeof(double) == 8, "f64 requires 8 byte doubles");
+typedef float f32;
+typedef double f64;
+
+#define MAX(A, B)  ((A) > (B) ? (A) : (B))
+#define MIN(A, B)  ((A) > (B) ? (B) : (A))
+#define ARRSIZE(A) ((sizeof(A)) / sizeof((A)[0]))
 
 #define FAIL(...)                 \
   do                              \
   {                               \
     fprintf(stderr, "FAIL: ");    \
     fprintf(stderr, __VA_ARGS__); \
-    abort();                      \
+    assert(0);                    \
   } while (0)
 
-char *read_file(const char *filename)
-{
-  FILE *fp = fopen(filename, "rb");
-  if (!fp)
-    FAIL("File `%s` does not exist\n", filename);
-
-  fseek(fp, 0, SEEK_END);
-  long size = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-  char *buffer = calloc(1, size + 1);
-  fread(buffer, size, 1, fp);
-  fclose(fp);
-
-  buffer[size] = '\0';
-  return buffer;
-}
-
-int main(void)
-{
-  const char *filename = "./examples/hello-world.arl";
-  char *buffer         = read_file(filename);
-  printf("%s => %s\n", filename, buffer);
-  free(buffer);
-  return 0;
-}
+#endif
 
 /* Copyright (C) 2026 Aryadev Chavali
 
