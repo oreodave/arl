@@ -15,6 +15,7 @@
 #include <arl/lib/base.h>
 #include <arl/lib/sv.h>
 #include <arl/lib/vec.h>
+#include <arl/parser/ast.h>
 #include <arl/parser/parser.h>
 
 /// Parser
@@ -39,7 +40,7 @@ int main(void)
 {
   const char *filename = "./examples/hello-world.arl";
   sv_t contents        = read_file(filename);
-  printf("%s => " PR_SV "\n", filename, SV_FMT(contents));
+  printf("%s\n=> `" PR_SV "`\n", filename, SV_FMT(contents));
 
   parse_stream_t stream = {.line = 1, .column = 0, .contents = contents};
   ast_t ast             = {0};
@@ -50,6 +51,9 @@ int main(void)
             parse_err_to_string(perr));
     goto fail;
   }
+  printf("=> Parsed %lu objects\n", ast.objects.size / sizeof(obj_t));
+  ast_print(stdout, &ast);
+  printf("\n");
 
   free(contents.data);
   ast_free(&ast);
