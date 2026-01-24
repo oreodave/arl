@@ -8,7 +8,7 @@ UNITS=main lib/vec lib/sv parser/ast parser/parser
 OBJECTS:=$(patsubst %,$(DIST)/%.o, $(UNITS))
 
 LDFLAGS=
-GFLAGS=-Wall -Wextra -Wpedantic -std=c23 -I./src/
+GFLAGS=-Wall -Wextra -Wpedantic -std=c23 -I./include/
 DFLAGS=-ggdb -fsanitize=address -fsanitize=undefined
 RFLAGS=-O3
 
@@ -26,7 +26,7 @@ DEPDIR=$(DIST)/deps
 $(OUT): $(OBJECTS) | $(DIST)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(DIST)/%.o: src/arl/%.c | $(DIST) $(DEPDIR)
+$(DIST)/%.o: src/%.c | $(DIST) $(DEPDIR)
 	$(CC) $(CFLAGS) $(DEPFLAGS) $(DEPDIR)/$*.d -c -o $@ $<
 
 $(DIST):
