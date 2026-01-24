@@ -15,15 +15,15 @@
 /// Types the AST can encode
 typedef enum
 {
-  TYPE_SYMBOL,
-  TYPE_STRING,
-} type_t;
+  OBJ_TYPE_SYMBOL,
+  OBJ_TYPE_STRING,
+} obj_type_t;
 
 /// Node of the AST as a tagged union
 typedef struct
 {
-  u64 byte;
-  type_t type;
+  u64 byte_location;
+  obj_type_t type;
   union
   {
     sv_t as_string;

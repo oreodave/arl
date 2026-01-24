@@ -11,18 +11,18 @@
 obj_t obj_string(u64 byte, sv_t string)
 {
   return (obj_t){
-      .byte  = byte,
-      .type  = TYPE_STRING,
-      .value = {string},
+      .byte_location = byte,
+      .type          = OBJ_TYPE_STRING,
+      .value         = {string},
   };
 }
 
 obj_t obj_symbol(u64 byte, sv_t symbol)
 {
   return (obj_t){
-      .byte  = byte,
-      .type  = TYPE_SYMBOL,
-      .value = {symbol},
+      .byte_location = byte,
+      .type          = OBJ_TYPE_SYMBOL,
+      .value         = {symbol},
   };
 }
 
@@ -35,10 +35,10 @@ void obj_print(FILE *fp, obj_t *obj)
   }
   switch (obj->type)
   {
-  case TYPE_SYMBOL:
+  case OBJ_TYPE_SYMBOL:
     fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(obj->value.as_symbol));
     break;
-  case TYPE_STRING:
+  case OBJ_TYPE_STRING:
     fprintf(fp, "STRING(" PR_SV ")", SV_FMT(obj->value.as_string));
     break;
   }
