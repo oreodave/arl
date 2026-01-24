@@ -1,0 +1,46 @@
+┌───────────────────────┐
+│     _    ____  _      │
+│    / \  |  _ \| |     │
+│   / _ \ | |_) | |     │
+│  / ___ \|  _ <| |___  │
+│ /_/   \_\_| \_\_____| │
+└───────────────────────┘
+
+Similar to Forth.  Compiles to C.
+Native speed with simple semantics.
+
+-----
+Goals
+-----
+- Complete operational transpiler to C
+- Ability to reuse compiled code (as object code) in top level ARL code.
+- Static type system with informative errors
+
+-------------
+Issue tracker
+-------------
+See arl.org.
+
+------------
+Requirements
+------------
+- C compiler with support for C23, accessible via PATH
+- GNU Make
+
+------------------
+Build instructions
+------------------
+$ make
+... will generate a binary "arlc.out" in the build folder, which may be used to
+compile ".arl" files into native code.
+
+$ make MODE=debug
+... will generate a debug binary that may be used for further examination and
+logging.
+
+You may specify the folder build artifacts are generated in by setting the DIST
+variable in your make invocation i.e.
+$ make DIST=<folder>
+
+Similarly, the general flags used in the C compiler may be set via the CFLAGS
+variable, with linking arguments set via the LDFLAGS variable.
