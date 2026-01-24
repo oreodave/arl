@@ -1,4 +1,4 @@
-/* main.cpp:
+/* main.c:
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
