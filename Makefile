@@ -35,6 +35,10 @@ $(DIST):
 $(DEPDIR):
 	mkdir -p $(patsubst %,$(DEPDIR)/%, $(MODULES))
 
+clangd: compile_commands.json
+compile_commands.json: Makefile
+	bear -- $(MAKE) -B MODE=debug
+
 .PHONY: run clean
 ARGS=
 run: $(OUT)
