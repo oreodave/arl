@@ -1,4 +1,4 @@
-/* ast.h: General definition of the AST and objects within it.
+/* ast.h: General definition of the AST and nodes within it.
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
@@ -15,32 +15,30 @@
 /// Types the AST can encode
 typedef enum
 {
-  OBJ_TYPE_SYMBOL,
-  OBJ_TYPE_STRING,
-} obj_type_t;
+  AST_NODE_TYPE_SYMBOL = 0,
+  AST_NODE_TYPE_STRING,
+} ast_node_type_t;
 
 /// Node of the AST as a tagged union
 typedef struct
 {
   u64 byte_location;
-  obj_type_t type;
+  ast_node_type_t type;
   union
   {
     sv_t as_string;
     sv_t as_symbol;
   } value;
-} obj_t;
+} ast_node_t;
 
-// Constructors
-obj_t obj_string(u64 byte, sv_t string);
-obj_t obj_symbol(u64 byte, sv_t symbol);
-
-void obj_print(FILE *fp, obj_t *obj);
+ast_node_t ast_node_string(u64 byte, sv_t string);
+ast_node_t ast_node_symbol(u64 byte, sv_t symbol);
+void ast_node_print(FILE *fp, ast_node_t *obj);
 
 /// The AST as a flat collection of nodes
 typedef struct
 {
-  vec_t objects;
+  vec_t nodes;
 } ast_t;
 
 void ast_free(ast_t *ast);

@@ -8,25 +8,25 @@
 #include <arl/lib/vec.h>
 #include <arl/parser/ast.h>
 
-obj_t obj_string(u64 byte, sv_t string)
+ast_node_t ast_node_string(u64 byte, sv_t string)
 {
-  return (obj_t){
+  return (ast_node_t){
       .byte_location = byte,
-      .type          = OBJ_TYPE_STRING,
+      .type          = AST_NODE_TYPE_STRING,
       .value         = {string},
   };
 }
 
-obj_t obj_symbol(u64 byte, sv_t symbol)
+ast_node_t ast_node_symbol(u64 byte, sv_t symbol)
 {
-  return (obj_t){
+  return (ast_node_t){
       .byte_location = byte,
-      .type          = OBJ_TYPE_SYMBOL,
+      .type          = AST_NODE_TYPE_SYMBOL,
       .value         = {symbol},
   };
 }
 
-void obj_print(FILE *fp, obj_t *obj)
+void ast_node_print(FILE *fp, ast_node_t *obj)
 {
   if (!obj)
   {
@@ -35,10 +35,10 @@ void obj_print(FILE *fp, obj_t *obj)
   }
   switch (obj->type)
   {
-  case OBJ_TYPE_SYMBOL:
+  case AST_NODE_TYPE_SYMBOL:
     fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(obj->value.as_symbol));
     break;
-  case OBJ_TYPE_STRING:
+  case AST_NODE_TYPE_STRING:
     fprintf(fp, "STRING(" PR_SV ")", SV_FMT(obj->value.as_string));
     break;
   }
@@ -52,18 +52,18 @@ void ast_print(FILE *fp, ast_t *ast)
     return;
   }
   fprintf(fp, "{");
-  if (ast->objects.size == 0)
+  if (ast->nodes.size == 0)
   {
     fprintf(fp, "}\n");
     return;
   }
 
   fprintf(fp, "\n");
-  for (u64 i = 0; i < ast->objects.size / sizeof(obj_t); ++i)
+  for (u64 i = 0; i < ast->nodes.size / sizeof(ast_node_t); ++i)
   {
-    obj_t item = VEC_GET(&ast->objects, i, obj_t);
+    ast_node_t item = VEC_GET(&ast->nodes, i, ast_node_t);
     fprintf(fp, "\t[%lu]: ", i);
-    obj_print(fp, &item);
+    ast_node_print(fp, &item);
     fprintf(fp, "\n");
   }
   fprintf(fp, "}");
@@ -72,7 +72,7 @@ void ast_print(FILE *fp, ast_t *ast)
 void ast_free(ast_t *ast)
 {
   // we can free the vector itself and we're done
-  vec_free(&ast->objects);
+  vec_free(&ast->nodes);
 }
 
 /* Copyright (C) 2026 Aryadev Chavali

@@ -54,7 +54,7 @@ int main(void)
             parse_err_to_string(perr));
     goto fail;
   }
-  printf("=> Parsed %lu objects\n", ast.objects.size / sizeof(obj_t));
+  printf("=> Parsed %lu nodes\n", ast.nodes.size / sizeof(ast_node_t));
   ast_print(stdout, &ast);
   printf("\n");
 
@@ -64,7 +64,7 @@ int main(void)
 fail:
   if (contents.data)
     free(contents.data);
-  if (ast.objects.capacity > 0)
+  if (ast.nodes.capacity > 0)
     ast_free(&ast);
   return 1;
 }

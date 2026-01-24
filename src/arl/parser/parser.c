@@ -56,8 +56,8 @@ void parse_stream_get_line_col(parse_stream_t *stream, u64 *line, u64 *col)
 }
 
 /// Prototypes for parsing subroutines
-parse_err_t parse_string(parse_stream_t *stream, obj_t *ret);
-parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret);
+parse_err_t parse_string(parse_stream_t *stream, ast_node_t *ret);
+parse_err_t parse_symbol(parse_stream_t *stream, ast_node_t *ret);
 
 parse_err_t parse(ast_t *out, parse_stream_t *stream)
 {
@@ -76,21 +76,21 @@ parse_err_t parse(ast_t *out, parse_stream_t *stream)
     else if (cur == '"')
     {
       // we make a copy for parse_string to mess with
-      obj_t ret        = {0};
+      ast_node_t ret   = {0};
       parse_err_t perr = parse_string(stream, &ret);
       if (perr)
         return perr;
-      vec_append(&out->objects, &ret, sizeof(ret));
+      vec_append(&out->nodes, &ret, sizeof(ret));
     }
     else if (strchr(SYMBOL_CHARS, cur) && !isdigit(cur))
     {
       // we make a copy for parse_symbol to mess with
-      obj_t ret        = {0};
+      ast_node_t ret   = {0};
       parse_err_t perr = parse_symbol(stream, &ret);
       if (perr)
         return perr;
 
-      vec_append(&out->objects, &ret, sizeof(ret));
+      vec_append(&out->nodes, &ret, sizeof(ret));
     }
     else
     {
@@ -100,7 +100,7 @@ parse_err_t parse(ast_t *out, parse_stream_t *stream)
   return PARSE_ERR_OK;
 }
 
-parse_err_t parse_string(parse_stream_t *stream, obj_t *ret)
+parse_err_t parse_string(parse_stream_t *stream, ast_node_t *ret)
 {
   // Increment the cursor just past the first speechmark
   stream_advance(stream, 1);
@@ -110,17 +110,18 @@ parse_err_t parse_string(parse_stream_t *stream, obj_t *ret)
     return PARSE_ERR_EXPECTED_SPEECH_MARKS;
   // Bounds of string are well defined, generate an object and advance the
   // stream
-  *ret = obj_string(stream->byte - 1, SV(current_contents.data, string_size));
+  *ret =
+      ast_node_string(stream->byte - 1, SV(current_contents.data, string_size));
   stream_advance(stream, string_size + 1);
   return PARSE_ERR_OK;
 }
 
-parse_err_t parse_symbol(parse_stream_t *stream, obj_t *ret)
+parse_err_t parse_symbol(parse_stream_t *stream, ast_node_t *ret)
 {
   sv_t current_contents = sv_chop_left(stream->contents, stream->byte);
   u64 symbol_size       = sv_while(current_contents, SYMBOL_CHARS);
   // Generate symbol
-  *ret = obj_symbol(stream->byte, SV(current_contents.data, symbol_size));
+  *ret = ast_node_symbol(stream->byte, SV(current_contents.data, symbol_size));
   stream_advance(stream, symbol_size);
   return PARSE_ERR_OK;
 }
