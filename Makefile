@@ -2,8 +2,10 @@ CC=cc
 
 DIST=build
 OUT=$(DIST)/arl.out
-MODULES=main lib/vec lib/sv parser/ast parser/parser
-OBJECTS:=$(patsubst %,$(DIST)/%.o, $(MODULES))
+
+MODULES=. lib parser
+UNITS=main lib/vec lib/sv parser/ast parser/parser
+OBJECTS:=$(patsubst %,$(DIST)/%.o, $(UNITS))
 
 LDFLAGS=
 GFLAGS=-Wall -Wextra -Wpedantic -std=c23 -I./src/
@@ -28,14 +30,10 @@ $(DIST)/%.o: src/arl/%.c | $(DIST) $(DEPDIR)
 	$(CC) $(CFLAGS) $(DEPFLAGS) $(DEPDIR)/$*.d -c -o $@ $<
 
 $(DIST):
-	mkdir -p $(DIST)
-	mkdir -p $(DIST)/lib
-	mkdir -p $(DIST)/parser
+	mkdir -p $(patsubst %,$(DIST)/%, $(MODULES))
 
 $(DEPDIR):
-	mkdir -p $(DEPDIR)
-	mkdir -p $(DEPDIR)/lib
-	mkdir -p $(DEPDIR)/parser
+	mkdir -p $(patsubst %,$(DEPDIR)/%, $(MODULES))
 
 .PHONY: run clean
 ARGS=
@@ -45,5 +43,5 @@ run: $(OUT)
 clean:
 	rm -rf $(DIST)
 
-DEPS:=$(patsubst %,$(DEPDIR)/%.d, $(MODULES))
+DEPS:=$(patsubst %,$(DEPDIR)/%.d, $(UNITS))
 include $(wildcard $(DEPS))
