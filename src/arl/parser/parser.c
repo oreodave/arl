@@ -5,10 +5,11 @@
  * Commentary: See parser.h
  */
 
-#include "arl/lib/sv.h"
 #include <ctype.h>
 #include <string.h>
 
+#include <arl/lib/sv.h>
+#include <arl/parser/ast.h>
 #include <arl/parser/parser.h>
 
 /// Expected characters in a symbol
@@ -27,7 +28,7 @@ const char *parse_err_to_string(parse_err_t err)
   case PARSE_ERR_UNKNOWN_CHAR:
     return "UNKNOWN_CHAR";
   default:
-    FAIL("Unexpected value for parse_err_t: %d\n", err);
+    FAIL("Unexpected parse_err_t value: %d\n", err);
   }
 }
 
@@ -119,10 +120,27 @@ parse_err_t parse_string(parse_stream_t *stream, ast_node_t *ret)
 parse_err_t parse_symbol(parse_stream_t *stream, ast_node_t *ret)
 {
   sv_t current_contents = sv_chop_left(stream->contents, stream->byte);
-  u64 symbol_size       = sv_while(current_contents, SYMBOL_CHARS);
-  // Generate symbol
-  *ret = ast_node_symbol(stream->byte, SV(current_contents.data, symbol_size));
-  stream_advance(stream, symbol_size);
+  sv_t symbol =
+      SV(current_contents.data, sv_while(current_contents, SYMBOL_CHARS));
+
+  // see if symbol is one of the AST primitives we can parse AOT
+  static_assert(NUM_AST_PRIMS == 2, "Expected number of AST primitives");
+  for (ast_prim_t i = 0; i < NUM_AST_PRIMS; ++i)
+  {
+    const char *possible_prim = ast_prim_to_cstr(i);
+    if (strlen(possible_prim) == symbol.size &&
+        strncmp(possible_prim, symbol.data, symbol.size) == 0)
+    {
+      // Found a matching primitive
+      *ret = ast_node_prim(stream->byte, i);
+      goto end;
+    }
+  }
+
+  // otherwise, it must be a fresh symbol i.e. user defined
+  *ret = ast_node_symbol(stream->byte, symbol);
+end:
+  stream_advance(stream, symbol.size);
   return PARSE_ERR_OK;
 }
 

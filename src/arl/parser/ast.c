@@ -5,15 +5,38 @@
  * Commentary: See ast.h.
  */
 
+#include <arl/lib/base.h>
 #include <arl/lib/vec.h>
 #include <arl/parser/ast.h>
+
+const char *ast_prim_to_cstr(ast_prim_t prim)
+{
+  switch (prim)
+  {
+  case AST_PRIM_NIL:
+    return "nil";
+  case AST_PRIM_PRINTLN:
+    return "println";
+  default:
+    FAIL("Unexpected AST primitive value: %d\n", prim);
+  }
+}
+
+ast_node_t ast_node_prim(u64 byte, ast_prim_t primitive)
+{
+  return (ast_node_t){
+      .byte_location = byte,
+      .type          = AST_NODE_TYPE_PRIMITIVE,
+      .value         = {.as_prim = primitive},
+  };
+}
 
 ast_node_t ast_node_string(u64 byte, sv_t string)
 {
   return (ast_node_t){
       .byte_location = byte,
       .type          = AST_NODE_TYPE_STRING,
-      .value         = {string},
+      .value         = {.as_string = string},
   };
 }
 
@@ -22,25 +45,31 @@ ast_node_t ast_node_symbol(u64 byte, sv_t symbol)
   return (ast_node_t){
       .byte_location = byte,
       .type          = AST_NODE_TYPE_SYMBOL,
-      .value         = {symbol},
+      .value         = {.as_symbol = symbol},
   };
 }
 
-void ast_node_print(FILE *fp, ast_node_t *obj)
+void ast_node_print(FILE *fp, ast_node_t *node)
 {
-  if (!obj)
+  if (!node)
   {
     fprintf(fp, "NIL");
     return;
   }
-  switch (obj->type)
+  switch (node->type)
   {
+  case AST_NODE_TYPE_PRIMITIVE:
+    fprintf(fp, "PRIMITIVE(%s)", ast_prim_to_cstr(node->value.as_prim));
+    break;
   case AST_NODE_TYPE_SYMBOL:
-    fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(obj->value.as_symbol));
+    fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(node->value.as_symbol));
     break;
   case AST_NODE_TYPE_STRING:
-    fprintf(fp, "STRING(" PR_SV ")", SV_FMT(obj->value.as_string));
+    fprintf(fp, "STRING(" PR_SV ")", SV_FMT(node->value.as_string));
     break;
+  case NUM_AST_NODE_TYPES:
+  default:
+    FAIL("Unexpected node type: %d\n", node->type);
   }
 }
 

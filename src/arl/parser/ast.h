@@ -15,9 +15,23 @@
 /// Types the AST can encode
 typedef enum
 {
-  AST_NODE_TYPE_SYMBOL = 0,
+  AST_NODE_TYPE_PRIMITIVE = 0,
+  AST_NODE_TYPE_SYMBOL,
   AST_NODE_TYPE_STRING,
+
+  NUM_AST_NODE_TYPES,
 } ast_node_type_t;
+
+/// Primitives (values, callables, etc) as symbols
+typedef enum
+{
+  AST_PRIM_NIL = 0,
+  AST_PRIM_PRINTLN,
+
+  NUM_AST_PRIMS,
+} ast_prim_t;
+
+const char *ast_prim_to_cstr(ast_prim_t);
 
 /// Node of the AST as a tagged union
 typedef struct
@@ -26,14 +40,16 @@ typedef struct
   ast_node_type_t type;
   union
   {
-    sv_t as_string;
+    ast_prim_t as_prim;
     sv_t as_symbol;
+    sv_t as_string;
   } value;
 } ast_node_t;
 
-ast_node_t ast_node_string(u64 byte, sv_t string);
+ast_node_t ast_node_prim(u64 byte, ast_prim_t primitive);
 ast_node_t ast_node_symbol(u64 byte, sv_t symbol);
-void ast_node_print(FILE *fp, ast_node_t *obj);
+ast_node_t ast_node_string(u64 byte, sv_t string);
+void ast_node_print(FILE *fp, ast_node_t *node);
 
 /// The AST as a flat collection of nodes
 typedef struct
