@@ -40,7 +40,6 @@ typedef double f64;
     fprintf(stderr, __VA_ARGS__); \
     assert(0);                    \
   } while (0)
-
 #endif
 
 /* Copyright (C) 2026 Aryadev Chavali
