@@ -2,7 +2,7 @@
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
- * Commentary: See ast.h.
+ * Commentary: See /include/arl/parser/ast.h.
  */
 
 #include <arl/lib/base.h>

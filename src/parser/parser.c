@@ -2,7 +2,7 @@
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
- * Commentary: See parser.h
+ * Commentary: See /include/arl/parser/parser.h
  */
 
 #include <ctype.h>
