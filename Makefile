@@ -9,7 +9,7 @@ OBJECTS:=$(patsubst %,$(DIST)/%.o, $(UNITS))
 
 LDFLAGS=
 GFLAGS=-Wall -Wextra -Wpedantic -std=c23 -I./include/
-DFLAGS=-ggdb -fsanitize=address -fsanitize=undefined
+DFLAGS=-ggdb -fsanitize=address -fsanitize=undefined -DVERBOSE_LOGS=1
 RFLAGS=-O3
 
 MODE=release

@@ -33,13 +33,35 @@ typedef double f64;
 #define MIN(A, B)  ((A) > (B) ? (B) : (A))
 #define ARRSIZE(A) ((sizeof(A)) / sizeof((A)[0]))
 
-#define FAIL(...)                 \
+#ifndef VERBOSE_LOGS
+#define VERBOSE_LOGS 0
+#endif
+
+#if VERBOSE_LOGS
+#define LOG(...)                  \
   do                              \
   {                               \
-    fprintf(stderr, "FAIL: ");    \
+    fprintf(stdout, "LOG: ");     \
+    fprintf(stdout, __VA_ARGS__); \
+  } while (0);
+#else
+#define LOG(...)
+#endif
+
+#define LOG_ERR(...)              \
+  do                              \
+  {                               \
     fprintf(stderr, __VA_ARGS__); \
-    assert(0);                    \
+  } while (0);
+
+#define FAIL(...)         \
+  do                      \
+  {                       \
+    LOG_ERR("FAIL: ");    \
+    LOG_ERR(__VA_ARGS__); \
+    assert(0);            \
   } while (0)
+
 #endif
 
 /* Copyright (C) 2026 Aryadev Chavali
