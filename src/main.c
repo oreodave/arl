@@ -20,6 +20,8 @@
 
 int read_file(const char *filename, sv_t *ret)
 {
+  // NOTE: Stupidly simple.  Presumes the file is NOT three pipes in a trench
+  // coat.
   FILE *fp = fopen(filename, "rb");
   if (!fp)
     return 1;
@@ -37,7 +39,8 @@ int read_file(const char *filename, sv_t *ret)
 
 int read_pipe(FILE *pipe, sv_t *ret)
 {
-  // Keep reading in chunks, keeping it altogether in a vector
+  // NOTE: We can't read an entire pipe at once like we did for read_file.  So
+  // let's read in buffered chunks, with a vector to keep them contiguous.
   vec_t contents = {0};
   char buffer[1024];
   while (!feof(pipe))
@@ -45,19 +48,21 @@ int read_pipe(FILE *pipe, sv_t *ret)
     size_t bytes_read = fread(buffer, 1, sizeof(buffer), pipe);
     vec_append(&contents, buffer, bytes_read);
   }
-  if (contents.size == 0)
-    return 1;
 
   ret->size = contents.size;
+  // Get that null terminator in, but only after we've recorded the actual size
+  // of what's been read.
   vec_append_byte(&contents, '\0');
-  // NOTE: vec_data(&contents) may be stack allocated; let's create a copy if
-  // that's the case.
+
   if (contents.not_inlined)
   {
+    // Take the heap pointer from us.
     ret->data = vec_data(&contents);
   }
   else
   {
+    // vec_data(&contents) is stack allocated; can't carry that out of this
+    // function!
     ret->data = calloc(1, contents.size);
     memcpy(ret->data, vec_data(&contents), contents.size);
   }
