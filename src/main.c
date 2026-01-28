@@ -35,12 +35,71 @@ int read_file(const char *filename, sv_t *ret)
   return 0;
 }
 
-int main(void)
+int read_pipe(FILE *pipe, sv_t *ret)
 {
-  int ret              = 0;
-  const char *filename = "./examples/hello-world.arl";
-  sv_t contents        = {0};
-  if (read_file(filename, &contents))
+  // Keep reading in chunks, keeping it altogether in a vector
+  vec_t contents = {0};
+  char buffer[1024];
+  while (!feof(pipe))
+  {
+    size_t bytes_read = fread(buffer, 1, sizeof(buffer), pipe);
+    vec_append(&contents, buffer, bytes_read);
+  }
+  if (contents.size == 0)
+    return 1;
+
+  ret->size = contents.size;
+  vec_append_byte(&contents, '\0');
+  // NOTE: vec_data(&contents) may be stack allocated; let's create a copy if
+  // that's the case.
+  if (contents.not_inlined)
+  {
+    ret->data = vec_data(&contents);
+  }
+  else
+  {
+    ret->data = calloc(1, contents.size);
+    memcpy(ret->data, vec_data(&contents), contents.size);
+  }
+  return 0;
+}
+
+void usage(FILE *fp)
+{
+  fprintf(fp, "Usage: arl [FILE]\n"
+              "Compiles [FILE] as ARL source code.\n"
+              "  [FILE]: File to compile.\n"
+              "If FILE is \"--\", then read from stdin.\n");
+}
+
+int main(int argc, char *argv[])
+{
+  int ret        = 0;
+  char *filename = "";
+  if (argc == 1)
+  {
+    usage(stderr);
+    ret = 1;
+    goto end;
+  }
+  else
+  {
+    filename = argv[1];
+  }
+
+  int read_err  = 0;
+  sv_t contents = {0};
+  if (strcmp(filename, "--") == 0)
+  {
+    filename = "stdin";
+    read_err = read_pipe(stdin, &contents);
+  }
+  else
+  {
+    read_err = read_file(filename, &contents);
+  }
+
+  if (read_err)
   {
     LOG_ERR("ERROR: Reading `%s`: ", filename);
     perror("");
