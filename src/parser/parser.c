@@ -123,16 +123,16 @@ parse_err_t parse_symbol(parse_stream_t *stream, ast_node_t *ret)
   sv_t symbol =
       SV(current_contents.data, sv_while(current_contents, SYMBOL_CHARS));
 
-  // see if symbol is one of the AST primitives we can parse AOT
-  static_assert(NUM_AST_PRIMS == 2, "Expected number of AST primitives");
-  for (ast_prim_t i = 0; i < NUM_AST_PRIMS; ++i)
+  // see if symbol is one of the already known symbols
+  static_assert(NUM_AST_KNOWNS == 2, "Expected number of AST KNOWN");
+  for (ast_known_t i = 0; i < NUM_AST_KNOWNS; ++i)
   {
-    const char *possible_prim = ast_prim_to_cstr(i);
+    const char *possible_prim = ast_known_to_cstr(i);
     if (strlen(possible_prim) == symbol.size &&
         strncmp(possible_prim, symbol.data, symbol.size) == 0)
     {
-      // Found a matching primitive
-      *ret = ast_node_prim(stream->byte, i);
+      // Found a matching known symbol
+      *ret = ast_node_known(stream->byte, i);
       goto end;
     }
   }

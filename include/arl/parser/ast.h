@@ -15,23 +15,23 @@
 /// Types the AST can encode
 typedef enum
 {
-  AST_NODE_TYPE_PRIMITIVE = 0,
+  AST_NODE_TYPE_KNOWN = 0,
   AST_NODE_TYPE_SYMBOL,
   AST_NODE_TYPE_STRING,
 
   NUM_AST_NODE_TYPES,
 } ast_node_type_t;
 
-/// Primitives (values, callables, etc) as symbols
+/// Known symbols - may reference callables or values.
 typedef enum
 {
-  AST_PRIM_NIL = 0,
-  AST_PRIM_PUTSTR,
+  AST_KNOWN_NIL = 0,
+  AST_KNOWN_PUTSTR,
 
-  NUM_AST_PRIMS,
-} ast_prim_t;
+  NUM_AST_KNOWNS,
+} ast_known_t;
 
-const char *ast_prim_to_cstr(ast_prim_t);
+const char *ast_known_to_cstr(ast_known_t);
 
 /// Node of the AST as a tagged union
 typedef struct
@@ -40,13 +40,13 @@ typedef struct
   ast_node_type_t type;
   union
   {
-    ast_prim_t as_prim;
+    ast_known_t as_known;
     sv_t as_symbol;
     sv_t as_string;
   } value;
 } ast_node_t;
 
-ast_node_t ast_node_prim(u64 byte, ast_prim_t primitive);
+ast_node_t ast_node_known(u64 byte, ast_known_t known);
 ast_node_t ast_node_symbol(u64 byte, sv_t symbol);
 ast_node_t ast_node_string(u64 byte, sv_t string);
 void ast_node_print(FILE *fp, ast_node_t *node);

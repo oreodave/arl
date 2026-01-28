@@ -9,25 +9,25 @@
 #include <arl/lib/vec.h>
 #include <arl/parser/ast.h>
 
-const char *ast_prim_to_cstr(ast_prim_t prim)
+const char *ast_known_to_cstr(ast_known_t known)
 {
-  switch (prim)
+  switch (known)
   {
-  case AST_PRIM_NIL:
+  case AST_KNOWN_NIL:
     return "nil";
-  case AST_PRIM_PUTSTR:
+  case AST_KNOWN_PUTSTR:
     return "putstr";
   default:
-    FAIL("Unexpected AST primitive value: %d\n", prim);
+    FAIL("Unexpected AST_KNOWN value: %d\n", known);
   }
 }
 
-ast_node_t ast_node_prim(u64 byte, ast_prim_t primitive)
+ast_node_t ast_node_known(u64 byte, ast_known_t known)
 {
   return (ast_node_t){
       .byte_location = byte,
-      .type          = AST_NODE_TYPE_PRIMITIVE,
-      .value         = {.as_prim = primitive},
+      .type          = AST_NODE_TYPE_KNOWN,
+      .value         = {.as_known = known},
   };
 }
 
@@ -58,8 +58,8 @@ void ast_node_print(FILE *fp, ast_node_t *node)
   }
   switch (node->type)
   {
-  case AST_NODE_TYPE_PRIMITIVE:
-    fprintf(fp, "PRIMITIVE(%s)", ast_prim_to_cstr(node->value.as_prim));
+  case AST_NODE_TYPE_KNOWN:
+    fprintf(fp, "KNOWN(%s)", ast_known_to_cstr(node->value.as_known));
     break;
   case AST_NODE_TYPE_SYMBOL:
     fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(node->value.as_symbol));
