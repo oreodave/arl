@@ -48,6 +48,7 @@ bindings, with the final expression being a reference to some binding.
 
 This also simplifies type checking to just verifying each little
 binding and operation.
+
 *** Examples
 **** Basic example
 Consider the following ARL code:
@@ -145,6 +146,10 @@ Define how we can type check arguments on the stack against the types
 a callable expects for its inputs.  In the same vein, we also need to
 figure out the type of whatever is pushed onto the stack by the
 callable.
+*** TODO Use SSA for user level bindings
+[[https://en.wikipedia.org/wiki/Static_single-assignment_form][Static
+single-assignment form]] is something we should use when we introduce
+for user level bindings.
 ** TODO Code generator
 [[file:src/arl/target-c/]]
 

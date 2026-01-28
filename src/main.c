@@ -18,7 +18,6 @@
 #include <arl/parser/ast.h>
 #include <arl/parser/parser.h>
 
-/// Parser
 sv_t read_file(const char *filename)
 {
   FILE *fp = fopen(filename, "rb");
