@@ -26,7 +26,7 @@ typedef enum
 typedef enum
 {
   AST_PRIM_NIL = 0,
-  AST_PRIM_PRINTLN,
+  AST_PRIM_PUTSTR,
 
   NUM_AST_PRIMS,
 } ast_prim_t;

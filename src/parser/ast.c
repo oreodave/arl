@@ -15,8 +15,8 @@ const char *ast_prim_to_cstr(ast_prim_t prim)
   {
   case AST_PRIM_NIL:
     return "nil";
-  case AST_PRIM_PRINTLN:
-    return "println";
+  case AST_PRIM_PUTSTR:
+    return "putstr";
   default:
     FAIL("Unexpected AST primitive value: %d\n", prim);
   }
