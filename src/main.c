@@ -18,28 +18,37 @@
 #include <arl/parser/ast.h>
 #include <arl/parser/parser.h>
 
-sv_t read_file(const char *filename)
+int read_file(const char *filename, sv_t *ret)
 {
   FILE *fp = fopen(filename, "rb");
   if (!fp)
-    FAIL("File `%s` does not exist\n", filename);
+    return 1;
 
   fseek(fp, 0, SEEK_END);
-  long size = ftell(fp);
+  ret->size = ftell(fp);
   fseek(fp, 0, SEEK_SET);
-  char *buffer = calloc(1, size + 1);
-  fread(buffer, size, 1, fp);
+  ret->data = calloc(1, ret->size + 1);
+  fread(ret->data, ret->size, 1, fp);
   fclose(fp);
 
-  buffer[size] = '\0';
-  return SV(buffer, size);
+  ret->data[ret->size] = '\0';
+  return 0;
 }
 
 int main(void)
 {
+  int ret              = 0;
   const char *filename = "./examples/hello-world.arl";
-  sv_t contents        = read_file(filename);
-  printf("%s\n=> `" PR_SV "`\n", filename, SV_FMT(contents));
+  sv_t contents        = {0};
+  if (read_file(filename, &contents))
+  {
+    LOG_ERR("ERROR: Reading `%s`: ", filename);
+    perror("");
+    ret = 1;
+    goto end;
+  }
+
+  LOG("%s => `" PR_SV "`\n", filename, SV_FMT(contents));
 
   parse_stream_t stream = {.byte = 0, .contents = contents};
   ast_t ast             = {0};
@@ -49,23 +58,23 @@ int main(void)
     u64 line = 1, col = 0;
     parse_stream_get_line_col(&stream, &line, &col);
 
-    fprintf(stderr, "%s:%lu:%lu: %s\n", filename, line, col,
-            parse_err_to_string(perr));
-    goto fail;
+    LOG_ERR("%s:%lu:%lu: %s\n", filename, line, col, parse_err_to_string(perr));
+    ret = 1;
+    goto end;
   }
-  printf("=> Parsed %lu nodes\n", ast.nodes.size / sizeof(ast_node_t));
+
+  LOG("Parsed %lu nodes\n", ast.nodes.size / sizeof(ast_node_t));
+#if VERBOSE_LOGS
   ast_print(stdout, &ast);
+#endif
   printf("\n");
 
-  free(contents.data);
-  ast_free(&ast);
-  return 0;
-fail:
+end:
   if (contents.data)
     free(contents.data);
   if (ast.nodes.capacity > 0)
     ast_free(&ast);
-  return 1;
+  return ret;
 }
 
 /* Copyright (C) 2026 Aryadev Chavali
