@@ -1,5 +1,6 @@
 #+title: ARL - Issue tracker
 #+date: 2026-01-23
+#+filetags: arl
 
 * TODO Write a minimum working transpiler
 We need to be able to compile the following file:
@@ -23,13 +24,13 @@ It's a Eulerian Path from the source code to the native executable.
 [[file:src/parser/]]
 [[file:include/arl/parser/]]
 
-We need to generate some form of AST from the token stream.  We want
-something a stage above the tokeniser so it should distinguish the
-following cases:
-- Literal value
-- Primitive call
-*** TODO AST design
-*** TODO Token Stream to AST implementation
+We need to generate some form of AST from the token stream.  This
+should be a little more advanced than our initial stream,
+distinguishing between
+- Literal values
+- Primitive calls
+- References to otherwise undefined words (may be defined through
+  import or later on)
 ** TODO Stack effect/type analysis
 [[file:src/analysis/]]
 [[file:include/arl/analysis/]]
