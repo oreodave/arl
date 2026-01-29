@@ -105,31 +105,32 @@ parse_err_t parse_string(parse_stream_t *stream, ast_node_t *ret)
 {
   // Increment the cursor just past the first speechmark
   stream_advance(stream, 1);
-  sv_t current_contents = sv_chop_left(stream->contents, stream->byte);
-  u64 string_size       = sv_till(current_contents, "\"");
-  if (string_size + stream->byte == stream_size(stream))
+  sv_t string = sv_chop_left(stream->contents, stream->byte);
+  string.size = sv_till(string, "\"");
+
+  // If we're at the edge of the stream, there must not have been any
+  // speechmarks.
+  if (string.size + stream->byte == stream_size(stream))
     return PARSE_ERR_EXPECTED_SPEECH_MARKS;
-  // Bounds of string are well defined, generate an object and advance the
-  // stream
-  *ret =
-      ast_node_string(stream->byte - 1, SV(current_contents.data, string_size));
-  stream_advance(stream, string_size + 1);
+
+  // `string` is well defined, package and throw it back.
+  *ret = ast_node_string(stream->byte - 1, string);
+  stream_advance(stream, string.size + 1);
   return PARSE_ERR_OK;
 }
 
 parse_err_t parse_symbol(parse_stream_t *stream, ast_node_t *ret)
 {
-  sv_t current_contents = sv_chop_left(stream->contents, stream->byte);
-  sv_t symbol =
-      SV(current_contents.data, sv_while(current_contents, SYMBOL_CHARS));
+  sv_t symbol = sv_chop_left(stream->contents, stream->byte);
+  symbol.size = sv_while(symbol, SYMBOL_CHARS);
 
   // see if symbol is one of the already known symbols
   static_assert(NUM_AST_KNOWNS == 2, "Expected number of AST KNOWN");
   for (ast_known_t i = 0; i < NUM_AST_KNOWNS; ++i)
   {
-    const char *possible_prim = ast_known_to_cstr(i);
-    if (strlen(possible_prim) == symbol.size &&
-        strncmp(possible_prim, symbol.data, symbol.size) == 0)
+    const char *possible_known = ast_known_to_cstr(i);
+    if (strlen(possible_known) == symbol.size &&
+        strncmp(possible_known, symbol.data, symbol.size) == 0)
     {
       // Found a matching known symbol
       *ret = ast_node_known(stream->byte, i);
