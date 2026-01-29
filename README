@@ -6,13 +6,12 @@
 │ /_/   \_\_| \_\_____| │
 └───────────────────────┘
 
-Similar to Forth.  Compiles to C.
-Native speed with simple semantics.
+Similar to Forth.
 
 -----
 Goals
 -----
-- Complete operational transpiler to C
+- Complete operational transpiler, with C as a provisional working target
 - Ability to reuse compiled code (as object code) in top level ARL code.
 - Static type system with informative errors
 
@@ -44,3 +43,12 @@ $ make DIST=<folder>
 
 Similarly, the general flags used in the C compiler may be set via the CFLAGS
 variable, with linking arguments set via the LDFLAGS variable.
+
+------------------
+Usage instructions
+------------------
+Once built, simply use the built binary like so:
+$ ./build/arl.out <filename>
+
+Alternatively, you can run the examples automatically via the Makefile:
+$ make examples
