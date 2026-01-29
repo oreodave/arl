@@ -13,8 +13,6 @@ const char *ast_known_to_cstr(ast_known_t known)
 {
   switch (known)
   {
-  case AST_KNOWN_NIL:
-    return "nil";
   case AST_KNOWN_PUTSTR:
     return "putstr";
   default:

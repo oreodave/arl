@@ -25,7 +25,6 @@ typedef enum
 /// Known symbols - may reference callables or values.
 typedef enum
 {
-  AST_KNOWN_NIL = 0,
   AST_KNOWN_PUTSTR,
 
   NUM_AST_KNOWNS,

@@ -125,7 +125,7 @@ parse_err_t parse_symbol(parse_stream_t *stream, ast_node_t *ret)
   symbol.size = sv_while(symbol, SYMBOL_CHARS);
 
   // see if symbol is one of the already known symbols
-  static_assert(NUM_AST_KNOWNS == 2, "Expected number of AST KNOWN");
+  static_assert(NUM_AST_KNOWNS == 1, "Expected number of AST_KNOWNs");
   for (ast_known_t i = 0; i < NUM_AST_KNOWNS; ++i)
   {
     const char *possible_known = ast_known_to_cstr(i);
