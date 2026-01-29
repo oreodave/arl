@@ -4,7 +4,7 @@ DIST=build
 OUT=$(DIST)/arl.out
 
 MODULES=. lib lexer
-UNITS=main lib/vec lib/sv lexer/token lexer/lexer
+UNITS=main cli lib/vec lib/sv lexer/token lexer/lexer
 OBJECTS:=$(patsubst %,$(DIST)/%.o, $(UNITS))
 
 LDFLAGS=
