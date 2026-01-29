@@ -2,7 +2,7 @@
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
- * Commentary: See /include/arl/lexr/lexr.h
+ * Commentary: See /include/arl/lexer/lexer.h
  */
 
 #include <ctype.h>

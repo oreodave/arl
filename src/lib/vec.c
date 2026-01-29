@@ -2,7 +2,7 @@
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
- * Commentary:
+ * Commentary: See /include/arl/lib/vec.h
 
  Taken from prick_vec.h: see https://github.com/oreodave/prick.
  */
