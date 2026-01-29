@@ -42,7 +42,7 @@ typedef struct
     ast_known_t as_known;
     sv_t as_symbol;
     sv_t as_string;
-  } value;
+  };
 } ast_node_t;
 
 ast_node_t ast_node_known(u64 byte, ast_known_t known);

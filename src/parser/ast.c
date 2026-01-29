@@ -25,7 +25,7 @@ ast_node_t ast_node_known(u64 byte, ast_known_t known)
   return (ast_node_t){
       .byte_location = byte,
       .type          = AST_NODE_TYPE_KNOWN,
-      .value         = {.as_known = known},
+      .as_known      = known,
   };
 }
 
@@ -34,7 +34,7 @@ ast_node_t ast_node_string(u64 byte, sv_t string)
   return (ast_node_t){
       .byte_location = byte,
       .type          = AST_NODE_TYPE_STRING,
-      .value         = {.as_string = string},
+      .as_string     = string,
   };
 }
 
@@ -43,7 +43,7 @@ ast_node_t ast_node_symbol(u64 byte, sv_t symbol)
   return (ast_node_t){
       .byte_location = byte,
       .type          = AST_NODE_TYPE_SYMBOL,
-      .value         = {.as_symbol = symbol},
+      .as_symbol     = symbol,
   };
 }
 
@@ -57,13 +57,13 @@ void ast_node_print(FILE *fp, ast_node_t *node)
   switch (node->type)
   {
   case AST_NODE_TYPE_KNOWN:
-    fprintf(fp, "KNOWN(%s)", ast_known_to_cstr(node->value.as_known));
+    fprintf(fp, "KNOWN(%s)", ast_known_to_cstr(node->as_known));
     break;
   case AST_NODE_TYPE_SYMBOL:
-    fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(node->value.as_symbol));
+    fprintf(fp, "SYMBOL(" PR_SV ")", SV_FMT(node->as_symbol));
     break;
   case AST_NODE_TYPE_STRING:
-    fprintf(fp, "STRING(" PR_SV ")", SV_FMT(node->value.as_string));
+    fprintf(fp, "STRING(" PR_SV ")", SV_FMT(node->as_string));
     break;
   case NUM_AST_NODE_TYPES:
   default:
