@@ -39,13 +39,17 @@ clangd: compile_commands.json
 compile_commands.json: Makefile
 	bear -- $(MAKE) -B MODE=debug
 
-.PHONY: run clean
+.PHONY: run clean examples
 ARGS=
 run: $(OUT)
 	./$^ $(ARGS)
 
 clean:
 	rm -rf $(DIST)
+
+examples: $(OUT)
+	@echo "Example: Hello World"
+	./$^ examples/hello-world.arl
 
 DEPS:=$(patsubst %,$(DEPDIR)/%.d, $(UNITS))
 include $(wildcard $(DEPS))
