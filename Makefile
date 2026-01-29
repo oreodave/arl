@@ -3,7 +3,7 @@ CC=cc
 DIST=build
 OUT=$(DIST)/arl.out
 
-MODULES=. lib lexer
+MODULES=$(shell cd include/arl; find . -type 'd' -printf "%f\n")
 UNITS=main cli lib/vec lib/sv lexer/token lexer/lexer
 OBJECTS:=$(patsubst %,$(DIST)/%.o, $(UNITS))
 
