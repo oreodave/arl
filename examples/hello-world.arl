@@ -1,1 +1,1 @@
-"Hello, world!\n" putstr
+"Hello, world!\n" puts
