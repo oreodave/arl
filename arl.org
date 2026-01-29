@@ -5,157 +5,59 @@
 We need to be able to compile the following file:
 [[file:examples/hello-world.arl]].  All it does is print "Hello,
 world!".  Should be relatively straightforward.
+** Stages
+We need the following stages in our MVP transpiler:
+- Source code reading (read bytes from a file)
+- Parse raw bytes into tokens (Lexer)
+- Interpret tokens into a classical AST (Parser)
+- Stack effect and type analysis of the AST for soundness
+- Translate AST into C code (Codegen)
+- Compile C code into native executable (Target)
+
+It's a Eulerian Path from the source code to the native executable.
 ** DONE Read file
-** DONE Parser
-** TODO Intermediate representation (Virtual Machine)
-[[file:src/arl/vm/]]
+** DONE Lexer
+[[file:src/lexer/]]
+[[file:include/arl/lexer/]]
+** WIP Parser
+[[file:src/parser/]]
+[[file:include/arl/parser/]]
 
-Before we get into generating C code and then compiling it, it might
-be worth translating the parsed ARL code into a generic IR.
+We need to generate some form of AST from the token stream.  We want
+something a stage above the tokeniser so it should distinguish the
+following cases:
+- Literal value
+- Primitive call
+*** TODO AST design
+*** TODO Token Stream to AST implementation
+** TODO Stack effect/type analysis
+[[file:src/analysis/]]
+[[file:include/arl/analysis/]]
 
-The IR should be primitive in its semantics but should still
-encapsulate the intention behind the original ARL code.  This should
-allow us to find a set of minimum requirements for target compilation:
-- what can we reasonably use from the target platform to satisfy
-  supporting the primitive IR?
-- what do we need to hand-roll on the target in order to make this
-  work?
+Given the AST, we need to verify the soundness of it with regards to
+types and the stack.  We have this idea of "stack effects" attached to
+every node in the AST; literals push values onto the stack and pop
+nothing, while operations may pop some operands and push some values.
 
-Essentially, we want to write a virtual machine, and translate ARL
-code into bytecode for that VM.  Goals:
-- Type checking
-- Optimiser (stretch)
+We need a way to:
+- Codify the stack effects of each type of AST node
+- Infer the total stack effect from a sequence of nodes
 
-We need the following clear items in our IR:
-- Static type values
-- Static type variables (possible DeBrujin numbering or other such
-  mechanism to abstract naming away and leave it to the target to
-  generate effectively)
-- Strongly typed primitive operators (numeric, strings, I/O) with
-  packed arguments
-
-We should have a rough grouping between AST objects and this IR.  As
-ARL is Forth-like, we can use the stack semantics to generate this IR
-as we walk the AST in a linear manner.  In practice this should almost
-look like emulating a really small subset of the ARL language itself
-and executing the program in that small subset.
-
-Looking at how
-[[https://en.wikipedia.org/wiki/Three-address_code][TAC]] works, I
-think it may be a good idea to do something like that for our IR.
-Essentially we should our AST into a sequence of really simple
-bindings, with the final expression being a reference to some binding.
-
-This also simplifies type checking to just verifying each little
-binding and operation.
-
-*** Examples
-**** Basic example
-Consider the following ARL code:
-#+begin_src text
-34 35 +
-#+end_src
-
-When we walk through the above code:
-- 34 (an integer) is pushed onto the stack
-- 35 (an integer) is pushed onto the stack
-- ~+~ primitive is encountered
-  - Type check the top two values of the stack; they should be
-    integral.
-  - ~a b +~ should correspond to ~a + b~ so the IR expression should
-    pack the arguments in that order: ~prim-add(34,35)~.
-  - Bind the generated IR expression to some unique name, say ~v1~.
-    - Ensure this works with type checking; looking up ~v1~'s type
-      should give you the output type of the "+" operator (integer).
-  - Push ~v1~ onto the stack.
-
-The final state of the stack should be something like ~[v1]~ where
-~v1=prim-add(34,35)~.  The final state of the stack, along with the
-bindings we form, is the IR, to pass over to the later stages of the
-compiler.
-**** Slightly more complex example
-Let's look at a slightly more complex program:
-#+begin_src text
-34 35 + 70 swap -
-#+end_src
-- 34 (integer) pushed
-- 35 (integer) pushed
-- ~+~ primitive:
-  - As stated previously, the final state of this primitive gives us
-    the name ~v1~ on the stack with the association
-    ~v1=prim-add(34,35)~.
-- 70 (integer) pushed
-- ~swap~ primitive:
-  - Requires two values on the stack, but we care little about their
-    types.  Just swaps their order on the stack.
-  - We /could/ introduce generics here to make the input/output
-    relation ship explicit (forall T, U swap:-(-> (T U) (U T))), but
-    at the same time we can just as easily get away with a type hole
-    (essentially some kind of ~any~).  Up to debate.
-  - We do not generate IR for this primitive as it simply isn't
-    necessary.  Instead we perform the swap on our IR stack and
-    continue.  The ~swap~ primitive is "transparent" in the final IR.
-  - In this situation, the stack goes from ~[v1, 70]~ to
-    ~[70, v1]~
-- ~-~ primitive:
-  - Type checks the top two values of the stack (which are both
-    integers)
-  - ~a b -~ should correspond to ~a - b~, thus the corresponding IR
-    expression should be ~prim-sub(70,v1)~
-  - Associate IR expression with name ~v2~,
-  - Push ~v2~ onto the stack.
-
-The final state of the IR should be:
-- Stack: ~[v2]~
-- Bindings:
-  - ~v1=prim-add(34,35)~
-  - ~v2=prim-sub(70,v1)~
-
-Notice how some primitives generate IR, while others manipulate IR
-themselves?  They almost seem like macros!
-
-Another thing of note is how the final state of the stack is a single
-item in this case; an IR expression representing the entire program.
-When we introduce code level bindings we won't have such nice outputs,
-but it is certainly something to consider.
-**** Hello world! example
-For our hello world:
-#+begin_src text
-"Hello, world!\n" putstr
-#+end_src
-- "Hello, world!\n" (string) pushed
-- "putstr" primitive:
-  - Type check the top of the stack (should be a string)
-  - Generate IR ~prim-putstr("Hello, world!\n")~
-  - Associate with name ~v1~ and push it onto the stack
-
-Much simpler than our
-*** TODO IR level type checking
-During IR compilation, the following should be type checked:
-- use of callables (primitives, user defined when implemented)
-- variable assignment (when implemented)
-- variable use (when implemented)
-- definition of callables (when implemented)
-
-We want to ensure no statement is unsound.
-**** TODO Primitive types
-Define the primitive types of the IR.  Remember, simplicity is key,
-but we need to mirror what we're getting on the ARL side.
-**** TODO Type contracts for callables
-Define how we can type check arguments on the stack against the types
-a callable expects for its inputs.  In the same vein, we also need to
-figure out the type of whatever is pushed onto the stack by the
-callable.
-*** TODO Use SSA for user level bindings
-[[https://en.wikipedia.org/wiki/Static_single-assignment_form][Static
-single-assignment form]] is something we should use when we introduce
-for user level bindings.
+These stack effects work in tandem with our type analysis.  Stack
+shape analysis tells us what operands are being fed into primitives,
+while the type analysis will tell us if the operands are well formed
+for the primitives.
 ** TODO Code generator
-[[file:src/arl/target-c/]]
+[[file:src/codegen/]]
+[[file:include/arl/codegen/]]
 
-This should take the IR translated from the AST generated by the
-parser, and write equivalent C code.
+This should take the AST generated by the parser (which should already
+have been analysed), and write equivalent C code.
+** TODO Target compilation
+[[file:src/target/]]
+[[file:include/arl/target/]]
 
-After we've generated the C code, we need to call a C compiler on it
-to generate a binary.  GCC and Clang allow passing source code through
-stdin, so we don't even need to write to disk first which is nice.
+=gcc= and =clang= take C code via /stdin/, so we don't need to write
+the C code to disk - we can just leave it as a buffer of bytes.  So
+we'll call the compilers and feed the generated code from the previous
+stage into it via stdin.
