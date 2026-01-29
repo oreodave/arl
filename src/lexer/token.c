@@ -13,8 +13,8 @@ const char *token_known_to_cstr(token_known_t known)
 {
   switch (known)
   {
-  case TOKEN_KNOWN_PUTSTR:
-    return "putstr";
+  case TOKEN_KNOWN_PUTS:
+    return "puts";
   default:
     FAIL("Unexpected TOKEN_KNOWN value: %d\n", known);
   }

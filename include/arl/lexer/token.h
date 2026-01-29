@@ -25,7 +25,7 @@ typedef enum
 /// Known symbols which later stages would benefit from.
 typedef enum
 {
-  TOKEN_KNOWN_PUTSTR,
+  TOKEN_KNOWN_PUTS,
   NUM_TOKEN_KNOWNS,
 } token_known_t;
 
