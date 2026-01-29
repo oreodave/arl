@@ -31,8 +31,12 @@ typedef struct
 
 static_assert(sizeof(vec_t) == 64, "Expected sizeof(vec_t) to be 64");
 
+// standard old appending methods
 void vec_append(vec_t *vec, const void *const ptr, u64 size);
 void vec_append_byte(vec_t *vec, u8 byte);
+
+// vector-as-a-stack
+u8 *vec_pop(vec_t *vec, u64 size);
 
 // Returns pointer to the start of the buffer VEC is currently using to store
 // data (either its inline buffer or the heap buffer).
@@ -43,7 +47,12 @@ void vec_ensure_capacity(vec_t *vec, u64 capacity);
 
 // Ensure VEC has at least SIZE bytes free
 void vec_ensure_free(vec_t *vec, u64 size);
+
+// Free the memory associated with the vector
 void vec_free(vec_t *vec);
+
+// Reset a vector while preserving any allocations
+void vec_reset(vec_t *vec);
 
 // Copy all data from V1 into V2.
 void vec_clone(vec_t *v2, vec_t *v1);

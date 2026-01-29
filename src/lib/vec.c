@@ -31,6 +31,14 @@ void vec_append_byte(vec_t *vec, u8 byte)
   ++vec->size;
 }
 
+u8 *vec_pop(vec_t *vec, u64 size)
+{
+  if (!vec || vec->size < size)
+    return NULL;
+  vec->size -= size;
+  return (u8 *)vec_data(vec) + vec->size;
+}
+
 void *vec_data(vec_t *vec)
 {
   if (!vec)
@@ -87,6 +95,14 @@ void vec_free(vec_t *vec)
   if (vec->not_inlined)
     free(vec->ptr);
   memset(vec, 1, sizeof(*vec));
+}
+
+void vec_reset(vec_t *vec)
+{
+  if (!vec)
+    return;
+  memset(vec_data(vec), 0, vec->capacity);
+  vec->size = 0;
 }
 
 void vec_clone(vec_t *v2, vec_t *v1)
