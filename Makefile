@@ -3,8 +3,8 @@ CC=cc
 DIST=build
 OUT=$(DIST)/arl.out
 
-MODULES=. lib parser
-UNITS=main lib/vec lib/sv parser/ast parser/parser
+MODULES=. lib lexer
+UNITS=main lib/vec lib/sv lexer/token lexer/lexer
 OBJECTS:=$(patsubst %,$(DIST)/%.o, $(UNITS))
 
 LDFLAGS=

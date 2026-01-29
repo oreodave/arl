@@ -12,11 +12,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <arl/lexer/lexer.h>
+#include <arl/lexer/token.h>
 #include <arl/lib/base.h>
 #include <arl/lib/sv.h>
 #include <arl/lib/vec.h>
-#include <arl/parser/ast.h>
-#include <arl/parser/parser.h>
 
 int read_file(const char *filename, sv_t *ret)
 {
@@ -114,30 +114,29 @@ int main(int argc, char *argv[])
 
   LOG("%s => `" PR_SV "`\n", filename, SV_FMT(contents));
 
-  parse_stream_t stream = {.byte = 0, .contents = contents};
-  ast_t ast             = {0};
-  parse_err_t perr      = parse(&ast, &stream);
+  lex_stream_t stream   = {.byte = 0, .contents = contents};
+  token_stream_t tokens = {0};
+  lex_err_t perr        = lex_stream(&tokens, &stream);
   if (perr)
   {
     u64 line = 1, col = 0;
-    parse_stream_get_line_col(&stream, &line, &col);
+    lex_stream_get_line_col(&stream, &line, &col);
 
-    LOG_ERR("%s:%lu:%lu: %s\n", filename, line, col, parse_err_to_string(perr));
+    LOG_ERR("%s:%lu:%lu: %s\n", filename, line, col, lex_err_to_string(perr));
     ret = 1;
     goto end;
   }
 
-  LOG("Parsed %lu nodes\n", ast.nodes.size / sizeof(ast_node_t));
+  LOG("Lexed %lu tokens\n", tokens.vec.size / sizeof(token_t));
 #if VERBOSE_LOGS
-  ast_print(stdout, &ast);
+  token_stream_print(stdout, &tokens);
 #endif
   printf("\n");
 
 end:
   if (contents.data)
     free(contents.data);
-  if (ast.nodes.capacity > 0)
-    ast_free(&ast);
+  token_stream_free(&tokens);
   return ret;
 }
 

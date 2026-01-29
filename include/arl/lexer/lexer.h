@@ -1,38 +1,38 @@
-/* parser.h: Parser which takes character buffers and yields an AST
+/* lexer.h: Lexer which takes character buffers and yields a sequence of tokens.
  * Created: 2026-01-22
  * Author: Aryadev Chavali
  * License: See end of file
  * Commentary:
  */
 
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef LEXER_H
+#define LEXER_H
 
-#include <arl/parser/ast.h>
+#include <arl/lexer/token.h>
 
-/// Parser streams, utilised when generating an AST.
+/// Token streams, utilised when lexing.
 typedef struct
 {
   u64 byte;
   sv_t contents;
-} parse_stream_t;
+} lex_stream_t;
 
-/// Types of errors that may occur during parsing
+/// Types of errors that may occur during lexing
 typedef enum
 {
-  PARSE_ERR_OK = 0,
-  PARSE_ERR_EXPECTED_SPEECH_MARKS,
-  PARSE_ERR_UNKNOWN_CHAR,
-} parse_err_t;
-const char *parse_err_to_string(parse_err_t err);
+  LEX_ERR_OK = 0,
+  LEX_ERR_EXPECTED_SPEECH_MARKS,
+  LEX_ERR_UNKNOWN_CHAR,
+} lex_err_t;
+const char *lex_err_to_string(lex_err_t err);
 
-// Generates an AST from STREAM, storing it in OUT.  Returns any errors it may
-// generate.
-parse_err_t parse(ast_t *out, parse_stream_t *stream);
+// Generates a token stream from a lex_stream_t, storing it in OUT.  Returns any
+// errors it may generate.
+lex_err_t lex_stream(token_stream_t *out, lex_stream_t *stream);
 
 // Computes the line and column that STREAM is currently pointing at in its
 // buffer, storing it in LINE and COL.
-void parse_stream_get_line_col(parse_stream_t *stream, u64 *line, u64 *col);
+void lex_stream_get_line_col(lex_stream_t *stream, u64 *line, u64 *col);
 
 #endif
 
